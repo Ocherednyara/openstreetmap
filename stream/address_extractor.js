@@ -28,6 +28,7 @@ var isObject = require('is-object');
 var extend = require('extend');
 var peliasLogger = require( 'pelias-logger' ).get( 'openstreetmap' );
 var Document = require('pelias-model').Document;
+var serbianTransliteration = require('../util/serbian-transliteration');
 
 function hasValidAddress( doc ){
   if( !isObject( doc ) ){ return false; }
@@ -64,6 +65,8 @@ module.exports = function(){
           // copy data to new document
           record = new Document( 'openstreetmap', 'address', newid.join(':') )
             .setName( 'default', streetno + ' ' + doc.address_parts.street )
+            .setNameAlias( 'default', streetno + ' ' + serbianTransliteration.serbianCyrillicToLatin(doc.address_parts.street) )
+            .setNameAlias( 'default', streetno + ' '  + serbianTransliteration.serbianNormalize(doc.address_parts.street) )
             .setCentroid( doc.getCentroid() );
 
           setProperties( record, doc );

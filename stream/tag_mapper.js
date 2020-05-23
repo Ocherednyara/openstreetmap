@@ -9,6 +9,8 @@ var through = require('through2'),
     merge = require('merge'),
     peliasLogger = require( 'pelias-logger' ).get( 'openstreetmap' );
 
+var serbianTransliteration = require('../util/serbian-transliteration');
+
 var LOCALIZED_NAME_KEYS = require('../config/localized_name_keys');
 var NAME_SCHEMA = require('../schema/name_osm');
 var ADDRESS_SCHEMA = merge( true, false,
@@ -41,6 +43,8 @@ module.exports = function(){
           var val1 = trim( tags[tag] );
           if( val1 ){
             doc.setName( suffix, val1 );
+            doc.setNameAlias( suffix, serbianTransliteration.serbianCyrillicToLatin(val1));
+            doc.setNameAlias( suffix, serbianTransliteration.serbianNormalize(val1));
           }
         }
 
@@ -50,10 +54,16 @@ module.exports = function(){
           if( val2 ){
             if( tag === NAME_SCHEMA._primary ){
               doc.setName( NAME_SCHEMA[tag], val2 );
+              doc.setNameAlias( NAME_SCHEMA[tag], serbianTransliteration.serbianCyrillicToLatin(val2));
+              doc.setNameAlias( NAME_SCHEMA[tag], serbianTransliteration.serbianNormalize(val2));
             } else if ( 'default' === NAME_SCHEMA[tag] ) {
               doc.setNameAlias( NAME_SCHEMA[tag], val2 );
+              doc.setNameAlias( NAME_SCHEMA[tag], serbianTransliteration.serbianCyrillicToLatin(val2));
+              doc.setNameAlias( NAME_SCHEMA[tag], serbianTransliteration.serbianNormalize(val2));
             } else {
               doc.setName( NAME_SCHEMA[tag], val2 );
+              doc.setNameAlias( NAME_SCHEMA[tag], serbianTransliteration.serbianCyrillicToLatin(val2));
+              doc.setNameAlias( NAME_SCHEMA[tag], serbianTransliteration.serbianNormalize(val2));
             }
           }
         }
@@ -81,6 +91,8 @@ module.exports = function(){
         // use one of the preferred name tags listed above
         if ( defaultName ){
           doc.setName('default', defaultName);
+          doc.setNameAlias( 'default', serbianTransliteration.serbianCyrillicToLatin(defaultName));
+          doc.setNameAlias( 'default', serbianTransliteration.serbianNormalize(defaultName) );
         }
 
         // else try to use an available two-letter language name tag
@@ -90,6 +102,8 @@ module.exports = function(){
           // unambiguous (there is only a single two-letter name tag)
           if ( keys.length === 1 ){
             doc.setName('default', doc.getName(keys[0]));
+            doc.setNameAlias( 'default', serbianTransliteration.serbianCyrillicToLatin(doc.getName(keys[0])));
+            doc.setNameAlias( 'default', serbianTransliteration.serbianNormalize(doc.getName(keys[0])));
           }
 
           // note we do not handle ambiguous cases where the record contains >1
